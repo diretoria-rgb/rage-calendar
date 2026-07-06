@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAGE â CalendÃ¡rio de ConteÃºdo</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+:root {
+  --bg: #0A0A08; --surface: #111110; --surface2: #1A1A18;
+  --border: #2A2A28; --border2: #333330;
+  --gold: #C8A96E; --gold-dim: #8A7048;
+  --sand: #E8E0D0; --sand-dim: #9A9288; --white: #F5F2EC;
+  --green-dim: #2A4A32;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--sand); font-family:'Inter',sans-serif; font-size:14px; min-height:100vh; }
+header { border-bottom:1px solid var(--border); padding:0 32px; height:56px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:var(--bg); z-index:100; }
+.header-brand { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:18px; letter-spacing:4px; color:var(--gold); text-transform:uppercase; }
+.header-sub { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--sand-dim); letter-spacing:2px; }
+.header-stats { display:flex; gap:24px; align-items:center; }
+.stat { text-align:right; }
+.stat-value { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:600; color:var(--gold); line-height:1; }
+.stat-label { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--sand-dim); letter-spacing:1px; text-transform:uppercase; }
+main { max-width:1100px; margin:0 auto; padding:32px 24px 80px; }
+.week { margin-bottom:48px; }
+.week-header { display:flex; align-items:baseline; gap:16px; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+.week-number { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:500; color:var(--gold-dim); letter-spacing:3px; text-transform:uppercase; }
+.week-theme { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:600; color:var(--white); letter-spacing:1px; }
+.week-dates { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--sand-dim); margin-left:8px; }
+.week-progress { margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--sand-dim); }
+.posts { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.post { background:var(--surface); border:1px solid var(--border); padding:20px; transition:border-color 0.2s; }
+.post:hover { border-color:var(--border2); }
+.post.done { border-color:var(--green-dim); background:#111A14; }
+.post.done .post-title { text-decoration:line-through; color:var(--sand-dim); }
+.post-day { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.day-tag { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; padding:3px 8px; border:1px solid; }
+.day-seg .day-tag { color:var(--gold); border-color:var(--gold-dim); }
+.day-qua .day-tag { color:#7EB8C8; border-color:#3A6878; }
+.day-sex .day-tag { color:#B87EC8; border-color:#684A78; }
+.post-date { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--sand-dim); letter-spacing:1px; }
+.channel-tag { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--sand-dim); letter-spacing:1px; margin-bottom:10px; }
+.post-title { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:600; color:var(--white); line-height:1.3; margin-bottom:6px; letter-spacing:0.5px; }
+.post-hook { font-size:11px; color:var(--gold-dim); font-style:italic; margin-bottom:8px; line-height:1.4; }
+.post-desc { font-size:12px; color:var(--sand-dim); line-height:1.6; margin-bottom:16px; }
+.done-badge { display:none; font-family:'JetBrains Mono',monospace; font-size:9px; color:#4A9A5A; letter-spacing:2px; margin-bottom:8px; }
+.post.done .done-badge { display:block; }
+.observation { display:none; font-size:12px; color:var(--sand-dim); font-style:italic; background:var(--surface2); padding:8px 10px; border-left:2px solid var(--gold-dim); margin-bottom:12px; line-height:1.5; }
+.post.has-obs .observation { display:block; }
+.post-actions { display:flex; gap:8px; align-items:center; }
+.btn { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; padding:5px 10px; border:1px solid; cursor:pointer; background:transparent; transition:all 0.15s; }
+.btn-done { color:#4A9A5A; border-color:var(--green-dim); }
+.btn-done:hover { background:var(--green-dim); color:var(--white); }
+.post.done .btn-done { color:var(--sand-dim); border-color:var(--border); }
+.btn-edit { color:var(--gold); border-color:var(--gold-dim); }
+.btn-edit:hover { background:var(--gold-dim); color:var(--bg); }
+.btn-obs { color:var(--sand-dim); border-color:var(--border); }
+.btn-obs:hover { border-color:var(--border2); color:var(--sand); }
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:200; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--surface); border:1px solid var(--border2); width:520px; max-width:95vw; padding:32px; }
+.obs-modal { background:var(--surface); border:1px solid var(--border2); width:440px; max-width:95vw; padding:28px; }
+.modal-title { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--gold); margin-bottom:24px; }
+.field { margin-bottom:16px; }
+.field label { display:block; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--sand-dim); margin-bottom:6px; }
+.field input, .field textarea, .field select { width:100%; background:var(--surface2); border:1px solid var(--border2); color:var(--sand); font-family:'Inter',sans-serif; font-size:13px; padding:10px 12px; outline:none; transition:border-color 0.15s; }
+.field input:focus, .field textarea:focus, .field select:focus { border-color:var(--gold-dim); }
+.field textarea { resize:vertical; min-height:80px; }
+.field select option { background:var(--surface2); }
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:24px; }
+.btn-cancel { color:var(--sand-dim); border-color:var(--border); font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; padding:8px 16px; border:1px solid; cursor:pointer; background:transparent; }
+.btn-save { color:var(--bg); background:var(--gold); border-color:var(--gold); font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; padding:8px 16px; border:1px solid; cursor:pointer; }
+.btn-save:hover { background:var(--white); border-color:var(--white); }
+.filter-bar { display:flex; gap:8px; margin-bottom:32px; flex-wrap:wrap; }
+.filter-btn { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; padding:6px 14px; border:1px solid var(--border); cursor:pointer; background:transparent; color:var(--sand-dim); transition:all 0.15s; }
+.filter-btn.active, .filter-btn:hover { border-color:var(--gold-dim); color:var(--gold); }
+.sync-status { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--sand-dim); letter-spacing:1px; display:flex; align-items:center; gap:8px; }
+.sync-dot { width:6px; height:6px; border-radius:50%; background:var(--gold-dim); }
+.sync-dot.online { background:#4A9A5A; }
+.empty { text-align:center; padding:60px 20px; color:var(--sand-dim); font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:2px; }
+@media (max-width:768px) {
+  .posts { grid-template-columns:1fr; }
+  header { padding:0 16px; }
+  main { padding:20px 16px 80px; }
+  .header-stats { display:none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-brand">RAGE</div>
+    <div class="header-sub">CALENDÃRIO DE CONTEÃDO â JUL/AGO 2026</div>
+  </div>
+  <div class="header-stats">
+    <div class="sync-status"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">conectando...</span></div>
+    <div class="stat"><div class="stat-value" id="stat-done">0</div><div class="stat-label">ConcluÃ­dos</div></div>
+    <div class="stat"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total</div></div>
+    <div class="stat"><div class="stat-value" id="stat-pct">0%</div><div class="stat-label">ExecuÃ§Ã£o</div></div>
+  </div>
+</header>
+
+<main>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="setFilter('all',this)">Todas</button>
+    <button class="filter-btn" onclick="setFilter('pending',this)">Pendentes</button>
+    <button class="filter-btn" onclick="setFilter('done',this)">ConcluÃ­das</button>
+    <button class="filter-btn" onclick="setFilter('seg',this)">Segunda</button>
+    <button class="filter-btn" onclick="setFilter('qua',this)">Quarta</button>
+    <button class="filter-btn" onclick="setFilter('sex',this)">Sexta</button>
+  </div>
+  <div id="calendar"></div>
+</main>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div class="modal-title">Editar PublicaÃ§Ã£o</div>
+    <div class="field"><label>TÃ­tulo</label><input type="text" id="edit-title"></div>
+    <div class="field"><label>Hook</label><input type="text" id="edit-hook"></div>
+    <div class="field"><label>DescriÃ§Ã£o</label><textarea id="edit-desc"></textarea></div>
+    <div class="field"><label>Canal</label>
+      <select id="edit-channel">
+        <option>Newsletter</option><option>Feed â Reels</option>
+        <option>Feed â Carrossel</option><option>Stories</option><option>Site Nuvemshop</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-edit')">Cancelar</button>
+      <button class="btn-save" onclick="saveEdit()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- OBS MODAL -->
+<div class="modal-overlay" id="modal-obs">
+  <div class="obs-modal">
+    <div class="modal-title">ObservaÃ§Ã£o</div>
+    <div class="field"><label>Nota</label><textarea id="obs-text" placeholder="Ex: postado com atraso, alcance alto..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-obs')">Cancelar</button>
+      <button class="btn-save" onclick="saveObs()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://vtlpqlyownnbxhmugzpj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_gmRaRY8p2XsjW-34RnopCA_6OhZcMFO';
+const TABLE = 'calendar_posts';
+
+const DEFAULT_WEEKS = [
+  { week:1, theme:"O atleta que ninguÃ©m vÃª", dates:"07 â 11 Jul", posts:[
+    {id:"1-seg",day:"seg",post_date:"07 Jul",channel:"Newsletter",title:"O atleta que ninguÃ©m vÃª",hook:"O aplauso Ã© pÃºblico. O trabalho Ã© privado.",description:"O que separa atletas consistentes nÃ£o Ã© talento â Ã© o que acontece quando ninguÃ©m estÃ¡ assistindo. Treinos Ã s 5h, sessÃµes sem PR, dias sem progresso visÃ­vel. Ã sobre o compromisso invisÃ­vel."},
+    {id:"1-qua",day:"qua",post_date:"09 Jul",channel:"Feed â Carrossel",title:"5 hÃ¡bitos de recuperaÃ§Ã£o que atletas sÃ©rios nÃ£o ignoram",hook:"Treino Ã© estÃ­mulo. RecuperaÃ§Ã£o Ã© onde o resultado acontece.",description:"Sono, hidrataÃ§Ã£o, alimentaÃ§Ã£o pÃ³s-treino, mobilidade e descanso ativo. Carrossel tÃ©cnico com dados simples e aplicaÃ§Ã£o prÃ¡tica."},
+    {id:"1-sex",day:"sex",post_date:"11 Jul",channel:"Stories",title:"Kit invisÃ­vel â dois looks que somem no treino",hook:"Quando a roupa funciona, vocÃª esquece que estÃ¡ usando.",description:"Velite + Bravo em colorways neutros. Foco no caimento limpo, sem texto excessivo."}
+  ]},
+  { week:2, theme:"ForÃ§a nÃ£o Ã© tamanho", dates:"14 â 18 Jul", posts:[
+    {id:"2-seg",day:"seg",post_date:"14 Jul",channel:"Newsletter",title:"ForÃ§a nÃ£o Ã© tamanho",hook:"O atleta mais forte da sala raramente Ã© o maior.",description:"ForÃ§a funcional vs hipertrofia estÃ©tica. Por que atletas de CrossFit e Hyrox desenvolvem forÃ§a diferente de fisiculturistas."},
+    {id:"2-qua",day:"qua",post_date:"16 Jul",channel:"Feed â Reels",title:"Por que a Malleus nÃ£o tem estampa",hook:"Design limpo Ã© uma decisÃ£o tÃ©cnica, nÃ£o estÃ©tica.",description:"Reels curto mostrando a construÃ§Ã£o da Malleus â sem estampa, sem excesso. Cada costura existe por um motivo."},
+    {id:"2-sex",day:"sex",post_date:"18 Jul",channel:"Stories",title:"Malleus em treino de forÃ§a â monocromÃ¡tico",hook:"Preta sobre preta. Sem distraÃ§Ã£o.",description:"Kit completo de forÃ§a: Malleus + Bravo em preto total. Ambiente real de box ou academia."}
+  ]},
+  { week:3, theme:"O erro que destrÃ³i a consistÃªncia", dates:"21 â 25 Jul", posts:[
+    {id:"3-seg",day:"seg",post_date:"21 Jul",channel:"Newsletter",title:"O erro que destrÃ³i a consistÃªncia",hook:"NÃ£o Ã© falta de motivaÃ§Ã£o. Ã excesso de ambiÃ§Ã£o no inÃ­cio.",description:"A maioria abandona o treino na semana 3-4. ProgressÃ£o inteligente Ã© mais sustentÃ¡vel do que intensidade mÃ¡xima."},
+    {id:"3-qua",day:"qua",post_date:"23 Jul",channel:"Feed â Carrossel",title:"O que o tecido da sua roupa diz sobre o seu treino",hook:"Gramatura, composiÃ§Ã£o e construÃ§Ã£o â por que importa.",description:"DiferenÃ§a entre 88/12 e 100% poliÃ©ster, o que Ã© flatlock e por que elimina irritaÃ§Ã£o, gramatura ideal por modalidade."},
+    {id:"3-sex",day:"sex",post_date:"25 Jul",channel:"Stories",title:"Scudo em dois contextos â forÃ§a e funcional",hook:"A mesma peÃ§a. Dois trabalhos diferentes.",description:"Scudo no levantamento olÃ­mpico vs treino funcional. DemonstraÃ§Ã£o de versatilidade. Paleta neutra."}
+  ]},
+  { week:4, theme:"Correr com intenÃ§Ã£o", dates:"28 Jul â 01 Ago", posts:[
+    {id:"4-seg",day:"seg",post_date:"28 Jul",channel:"Newsletter",title:"Correr com intenÃ§Ã£o",hook:"Zona 2 nÃ£o Ã© treino fÃ¡cil. Ã treino inteligente.",description:"A diferenÃ§a entre correr para cansar e correr para evoluir. Zonas de frequÃªncia cardÃ­aca na prÃ¡tica."},
+    {id:"4-qua",day:"qua",post_date:"30 Jul",channel:"Feed â Reels",title:"Por que o Rifte tem alÃ§a e o Bravo nÃ£o",hook:"Cada funÃ§Ã£o exige uma soluÃ§Ã£o diferente.",description:"Comparando os dois shorts em contexto real. Rifte para corrida/Hyrox. Bravo para CrossFit. Produto explicado por funÃ§Ã£o."},
+    {id:"4-sex",day:"sex",post_date:"01 Ago",channel:"Stories",title:"Kit de corrida â Velite + Rifte em paleta terrosa",hook:"Leve o suficiente para esquecer que estÃ¡ usando.",description:"Velite aberta + Rifte em tons terrosos/caqui. Ambiente externo â rua, trilha ou pista."}
+  ]},
+  { week:5, theme:"O que a fadiga revela", dates:"04 â 08 Ago", posts:[
+    {id:"5-seg",day:"seg",post_date:"04 Ago",channel:"Newsletter",title:"O que a fadiga revela",hook:"Quando vocÃª estÃ¡ exausto, o que sobra Ã© o que vocÃª realmente construiu.",description:"Fadiga elimina tÃ©cnica ruim, forÃ§a fingida e resistÃªncia aparente. Como usar a fadiga como diagnÃ³stico do seu treinamento."},
+    {id:"5-qua",day:"qua",post_date:"06 Ago",channel:"Feed â Carrossel",title:"Como identificar se sua roupa estÃ¡ te atrapalhando",hook:"Se vocÃª pensou na roupa durante o treino, ela falhou.",description:"5 sinais de que a roupa estÃ¡ interferindo na performance. Cada problema tem uma causa tÃ©cnica."},
+    {id:"5-sex",day:"sex",post_date:"08 Ago",channel:"Stories",title:"Sentinel em treino longo â do aquecimento ao final",hook:"A camiseta que acompanha sem interferir.",description:"Sentinel em ambiente de treino extenso â aquecimento, trabalho principal, volta Ã  calma. A mesma peÃ§a em trÃªs momentos."}
+  ]},
+  { week:6, theme:"ConstruÃ­do para durar", dates:"11 â 15 Ago", posts:[
+    {id:"6-seg",day:"seg",post_date:"11 Ago",channel:"Newsletter",title:"ConstruÃ­do para durar",hook:"PeÃ§a barata Ã© aquela que vocÃª compra toda temporada.",description:"O custo real de uma roupa de treino de baixa qualidade. O argumento econÃ´mico e filosÃ³fico por investir em gear de qualidade."},
+    {id:"6-qua",day:"qua",post_date:"13 Ago",channel:"Feed â Reels",title:"Uma peÃ§a Rage depois de 6 meses de uso real",hook:"O que sobrevive ao treino honesto.",description:"Reels mostrando uma peÃ§a usada intensamente. ComparaÃ§Ã£o tÃ©cnica de construÃ§Ã£o: flatlock vs costura comum."},
+    {id:"6-sex",day:"sex",post_date:"15 Ago",channel:"Stories",title:"Kit completo Rage â cada peÃ§a com uma funÃ§Ã£o",hook:"Nada aqui Ã© decoraÃ§Ã£o.",description:"Flat lay ou look completo: Sentinel/Malleus + Bravo/Rifte + bonÃ©. Cada item com funÃ§Ã£o. Encerra o ciclo."}
+  ]}
+];
