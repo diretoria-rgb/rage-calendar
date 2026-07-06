@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RAGE - Calendario de Conteudo</title>
+<title>RAGE - Calendario</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0A0A08;--surface:#111110;--surface2:#1A1A18;--border:#2A2A28;--border2:#333330;--gold:#C8A96E;--gold-dim:#8A7048;--sand:#E8E0D0;--sand-dim:#9A9288;--white:#F5F2EC;--green-dim:#2A4A32;}
@@ -78,7 +78,7 @@ main{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
 <header>
   <div><div class="hb">RAGE</div><div class="hs">CALENDARIO DE CONTEUDO - JUL/AGO 2026</div></div>
   <div class="hst">
-    <div class="ss"><div class="dot" id="dot"></div><span id="slbl">carregando...</span></div>
+    <div class="ss"><div class="dot" id="dot"></div><span id="slbl">local</span></div>
     <div class="stat"><div class="sv" id="sd">0</div><div class="sl">Concluidos</div></div>
     <div class="stat"><div class="sv" id="st">0</div><div class="sl">Total</div></div>
     <div class="stat"><div class="sv" id="sp">0%</div><div class="sl">Execucao</div></div>
@@ -113,70 +113,65 @@ main{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
   </div>
 </div>
 <script>
-document.addEventListener('DOMContentLoaded',function(){
 var SU='https://vtlpqlyownnbxhmugzpj.supabase.co';
 var SK='sb_publishable_gmRaRY8p2XsjW-34RnopCA_6OhZcMFO';
 var TB='calendar_posts';
-var LSK='rage_cal_v5';
-var CF='all',EID=null,OID=null;
+var LSK='rage_cal_v6';
+var CF='all',EID=null,OID=null,DATA=[];
 
-var DW=[
-{week:1,theme:"O atleta que ninguem ve",dates:"07-11 Jul",posts:[
-{id:"1-seg",day:"seg",post_date:"07 Jul",channel:"Newsletter",title:"O atleta que ninguem ve",hook:"O aplauso e publico. O trabalho e privado.",description:"O que separa atletas consistentes nao e talento. E o que acontece quando ninguem esta assistindo. Treinos as 5h, sessoes sem PR, dias sem progresso visivel."},
-{id:"1-qua",day:"qua",post_date:"09 Jul",channel:"Feed - Carrossel",title:"5 habitos de recuperacao que atletas serios nao ignoram",hook:"Treino e estimulo. Recuperacao e onde o resultado acontece.",description:"Sono, hidratacao, alimentacao pos-treino, mobilidade e descanso ativo. Carrossel tecnico com dados simples."},
-{id:"1-sex",day:"sex",post_date:"11 Jul",channel:"Stories",title:"Kit invisivel - dois looks que somem no treino",hook:"Quando a roupa funciona, voce esquece que esta usando.",description:"Velite + Bravo em colorways neutros. Foco no caimento limpo, sem texto excessivo."}
-]},
-{week:2,theme:"Forca nao e tamanho",dates:"14-18 Jul",posts:[
-{id:"2-seg",day:"seg",post_date:"14 Jul",channel:"Newsletter",title:"Forca nao e tamanho",hook:"O atleta mais forte da sala raramente e o maior.",description:"Forca funcional vs hipertrofia estetica. Por que atletas de CrossFit e Hyrox desenvolvem forca diferente de fisiculturistas."},
-{id:"2-qua",day:"qua",post_date:"16 Jul",channel:"Feed - Reels",title:"Por que a Malleus nao tem estampa",hook:"Design limpo e uma decisao tecnica, nao estetica.",description:"Reels curto mostrando a construcao da Malleus. Sem estampa, sem excesso. Cada costura existe por um motivo."},
-{id:"2-sex",day:"sex",post_date:"18 Jul",channel:"Stories",title:"Malleus em treino de forca - monocromatico",hook:"Preta sobre preta. Sem distracao.",description:"Kit completo de forca: Malleus + Bravo em preto total. Ambiente real de box ou academia."}
-]},
-{week:3,theme:"O erro que destroi a consistencia",dates:"21-25 Jul",posts:[
-{id:"3-seg",day:"seg",post_date:"21 Jul",channel:"Newsletter",title:"O erro que destroi a consistencia",hook:"Nao e falta de motivacao. E excesso de ambicao no inicio.",description:"A maioria abandona o treino na semana 3-4. Progressao inteligente e mais sustentavel do que intensidade maxima."},
-{id:"3-qua",day:"qua",post_date:"23 Jul",channel:"Feed - Carrossel",title:"O que o tecido da sua roupa diz sobre o seu treino",hook:"Gramatura, composicao e construcao - por que importa.",description:"Diferenca entre 88/12 e 100% poliester, o que e flatlock e por que elimina irritacao, gramatura ideal por modalidade."},
-{id:"3-sex",day:"sex",post_date:"25 Jul",channel:"Stories",title:"Scudo em dois contextos - forca e funcional",hook:"A mesma peca. Dois trabalhos diferentes.",description:"Scudo no levantamento olimpico vs treino funcional. Demonstracao de versatilidade. Paleta neutra."}
-]},
-{week:4,theme:"Correr com intencao",dates:"28 Jul-01 Ago",posts:[
-{id:"4-seg",day:"seg",post_date:"28 Jul",channel:"Newsletter",title:"Correr com intencao",hook:"Zona 2 nao e treino facil. E treino inteligente.",description:"A diferenca entre correr para cansar e correr para evoluir. Zonas de frequencia cardiaca na pratica."},
-{id:"4-qua",day:"qua",post_date:"30 Jul",channel:"Feed - Reels",title:"Por que o Rifte tem alca e o Bravo nao",hook:"Cada funcao exige uma solucao diferente.",description:"Comparando os dois shorts em contexto real. Rifte para corrida e Hyrox. Bravo para CrossFit. Produto explicado por funcao."},
-{id:"4-sex",day:"sex",post_date:"01 Ago",channel:"Stories",title:"Kit de corrida - Velite + Rifte em paleta terrosa",hook:"Leve o suficiente para esquecer que esta usando.",description:"Velite aberta + Rifte em tons terrosos e caqui. Ambiente externo - rua, trilha ou pista."}
-]},
-{week:5,theme:"O que a fadiga revela",dates:"04-08 Ago",posts:[
-{id:"5-seg",day:"seg",post_date:"04 Ago",channel:"Newsletter",title:"O que a fadiga revela",hook:"Quando voce esta exausto, o que sobra e o que voce realmente construiu.",description:"Fadiga elimina tecnica ruim, forca fingida e resistencia aparente. Como usar a fadiga como diagnostico do seu treinamento."},
-{id:"5-qua",day:"qua",post_date:"06 Ago",channel:"Feed - Carrossel",title:"Como identificar se sua roupa esta te atrapalhando",hook:"Se voce pensou na roupa durante o treino, ela falhou.",description:"5 sinais de que a roupa esta interferindo na performance. Cada problema tem uma causa tecnica."},
-{id:"5-sex",day:"sex",post_date:"08 Ago",channel:"Stories",title:"Sentinel em treino longo - do aquecimento ao final",hook:"A camiseta que acompanha sem interferir.",description:"Sentinel em ambiente de treino extenso. Aquecimento, trabalho principal, volta a calma. A mesma peca em tres momentos."}
-]},
-{week:6,theme:"Construido para durar",dates:"11-15 Ago",posts:[
-{id:"6-seg",day:"seg",post_date:"11 Ago",channel:"Newsletter",title:"Construido para durar",hook:"Peca barata e aquela que voce compra toda temporada.",description:"O custo real de uma roupa de treino de baixa qualidade. O argumento economico e filosofico por investir em gear de qualidade."},
-{id:"6-qua",day:"qua",post_date:"13 Ago",channel:"Feed - Reels",title:"Uma peca Rage depois de 6 meses de uso real",hook:"O que sobrevive ao treino honesto.",description:"Reels mostrando uma peca usada intensamente. Comparacao tecnica de construcao: flatlock vs costura comum."},
-{id:"6-sex",day:"sex",post_date:"15 Ago",channel:"Stories",title:"Kit completo Rage - cada peca com uma funcao",hook:"Nada aqui e decoracao.",description:"Flat lay ou look completo: Sentinel ou Malleus + Bravo ou Rifte + bone. Cada item com funcao. Encerra o ciclo."}
-]}
+var W1P=[
+{id:'1-seg',day:'seg',d:'07 Jul',ch:'Newsletter',t:'O atleta que ninguem ve',h:'O aplauso e publico. O trabalho e privado.',dc:'O que separa atletas consistentes nao e talento. E o que acontece quando ninguem esta assistindo. Treinos as 5h, sessoes sem PR, dias sem progresso visivel.'},
+{id:'1-qua',day:'qua',d:'09 Jul',ch:'Feed - Carrossel',t:'5 habitos de recuperacao que atletas serios nao ignoram',h:'Treino e estimulo. Recuperacao e onde o resultado acontece.',dc:'Sono, hidratacao, alimentacao pos-treino, mobilidade e descanso ativo. Carrossel tecnico com dados simples e aplicacao pratica.'},
+{id:'1-sex',day:'sex',d:'11 Jul',ch:'Stories',t:'Kit invisivel - dois looks que somem no treino',h:'Quando a roupa funciona, voce esquece que esta usando.',dc:'Velite + Bravo em colorways neutros. Foco no caimento limpo, sem texto excessivo.'}
+];
+var W2P=[
+{id:'2-seg',day:'seg',d:'14 Jul',ch:'Newsletter',t:'Forca nao e tamanho',h:'O atleta mais forte da sala raramente e o maior.',dc:'Forca funcional vs hipertrofia estetica. Por que atletas de CrossFit e Hyrox desenvolvem forca diferente de fisiculturistas.'},
+{id:'2-qua',day:'qua',d:'16 Jul',ch:'Feed - Reels',t:'Por que a Malleus nao tem estampa',h:'Design limpo e uma decisao tecnica, nao estetica.',dc:'Reels curto mostrando a construcao da Malleus. Sem estampa, sem excesso. Cada costura existe por um motivo.'},
+{id:'2-sex',day:'sex',d:'18 Jul',ch:'Stories',t:'Malleus em treino de forca - monocromatico',h:'Preta sobre preta. Sem distracao.',dc:'Kit completo de forca: Malleus + Bravo em preto total. Ambiente real de box ou academia.'}
+];
+var W3P=[
+{id:'3-seg',day:'seg',d:'21 Jul',ch:'Newsletter',t:'O erro que destroi a consistencia',h:'Nao e falta de motivacao. E excesso de ambicao no inicio.',dc:'A maioria abandona o treino na semana 3-4. Progressao inteligente e mais sustentavel do que intensidade maxima.'},
+{id:'3-qua',day:'qua',d:'23 Jul',ch:'Feed - Carrossel',t:'O que o tecido da sua roupa diz sobre o treino',h:'Gramatura, composicao e construcao - por que importa.',dc:'Diferenca entre 88/12 e 100% poliester, o que e flatlock e por que elimina irritacao, gramatura ideal por modalidade.'},
+{id:'3-sex',day:'sex',d:'25 Jul',ch:'Stories',t:'Scudo em dois contextos - forca e funcional',h:'A mesma peca. Dois trabalhos diferentes.',dc:'Scudo no levantamento olimpico vs treino funcional. Demonstracao de versatilidade. Paleta neutra.'}
+];
+var W4P=[
+{id:'4-seg',day:'seg',d:'28 Jul',ch:'Newsletter',t:'Correr com intencao',h:'Zona 2 nao e treino facil. E treino inteligente.',dc:'A diferenca entre correr para cansar e correr para evoluir. Zonas de frequencia cardiaca na pratica.'},
+{id:'4-qua',day:'qua',d:'30 Jul',ch:'Feed - Reels',t:'Por que o Rifte tem alca e o Bravo nao',h:'Cada funcao exige uma solucao diferente.',dc:'Comparando os dois shorts em contexto real. Rifte para corrida e Hyrox. Bravo para CrossFit. Produto explicado por funcao.'},
+{id:'4-sex',day:'sex',d:'01 Ago',ch:'Stories',t:'Kit de corrida - Velite + Rifte em paleta terrosa',h:'Leve o suficiente para esquecer que esta usando.',dc:'Velite aberta + Rifte em tons terrosos e caqui. Ambiente externo - rua, trilha ou pista.'}
+];
+var W5P=[
+{id:'5-seg',day:'seg',d:'04 Ago',ch:'Newsletter',t:'O que a fadiga revela',h:'Quando voce esta exausto, o que sobra e o que voce realmente construiu.',dc:'Fadiga elimina tecnica ruim, forca fingida e resistencia aparente. Como usar a fadiga como diagnostico do seu treinamento.'},
+{id:'5-qua',day:'qua',d:'06 Ago',ch:'Feed - Carrossel',t:'Como identificar se sua roupa esta te atrapalhando',h:'Se voce pensou na roupa durante o treino, ela falhou.',dc:'5 sinais de que a roupa esta interferindo na performance. Cada problema tem uma causa tecnica.'},
+{id:'5-sex',day:'sex',d:'08 Ago',ch:'Stories',t:'Sentinel em treino longo - do aquecimento ao final',h:'A camiseta que acompanha sem interferir.',dc:'Sentinel em ambiente de treino extenso. Aquecimento, trabalho principal, volta a calma. A mesma peca em tres momentos.'}
+];
+var W6P=[
+{id:'6-seg',day:'seg',d:'11 Ago',ch:'Newsletter',t:'Construido para durar',h:'Peca barata e aquela que voce compra toda temporada.',dc:'O custo real de uma roupa de treino de baixa qualidade. O argumento economico e filosofico por investir em gear de qualidade.'},
+{id:'6-qua',day:'qua',d:'13 Ago',ch:'Feed - Reels',t:'Uma peca Rage depois de 6 meses de uso real',h:'O que sobrevive ao treino honesto.',dc:'Reels mostrando uma peca usada intensamente. Comparacao tecnica de construcao: flatlock vs costura comum.'},
+{id:'6-sex',day:'sex',d:'15 Ago',ch:'Stories',t:'Kit completo Rage - cada peca com uma funcao',h:'Nada aqui e decoracao.',dc:'Flat lay ou look completo: Sentinel ou Malleus + Bravo ou Rifte + bone. Cada item com funcao. Encerra o ciclo.'}
 ];
 
-var DATA=[];
+var DW=[
+{week:4,theme:'O atleta que ninguem ve',dates:'07-11 Jul',posts:W1P},
+{week:2,theme:'Forca nao e tamanho',dates:'14-18 Jul',posts:W2P},
+{week:3,theme:'O erro que destroi a consistencia',dates:'21-25 Jul',posts:W3P},
+{week:4,theme:'Correr com intencao',dates:'28 Jul-01 Ago',posts:W4P},
+{week:5,theme:'O que a fadiga revela',dates:'04-08 Ago',posts:W5P},
+{week:6,theme:'Construido para durar',dates:'11-15 Ago',posts:W6P}
+];
 
-function initData(){
+function initD(){
   var raw=localStorage.getItem(LSK);
   if(raw){try{DATA=JSON.parse(raw);return;}catch(e){}}
-  DATA=DW.map(function(w){return Object.assign({},w,{posts:w.posts.map(function(p){return Object.assign({},p,{done:false,obs:''});})});});
+  DATA=DW.map(function(w){
+    return {week:w.week,theme:w.theme,dates:w.dates,posts:w.posts.map(function(p){
+      return {id:p.id,day:p.day,d:p.d,ch:p.ch,t:p.t,h:p.h,dc:p.dc,done:false,obs:''};
+    })};
+  });
 }
-
 function saveLS(){localStorage.setItem(LSK,JSON.stringify(DATA));}
-
 function gp(id){for(var i=0;i<DATA.length;i++){for(var j=0;j<DATA[i].posts.length;j++){if(DATA[i].posts[j].id===id)return DATA[i].posts[j];}}return null;}
-
-function setOn(v){
-  document.getElementById('dot').className='dot'+(v?' on':'');
-  document.getElementById('slbl').textContent=v?'sincronizado':'local';
-}
-
-function mf(p){
-  if(CF==='all')return true;
-  if(CF==='done')return p.done;
-  if(CF==='pending')return!p.done;
-  return p.day===CF;
-}
-
+function setOn(v){document.getElementById('dot').className='dot'+(v?' on':'');document.getElementById('slbl').textContent=v?'sincronizado':'local';}
+function mf(p){if(CF==='all')return true;if(CF==='done')return p.done;if(CF==='pending')return!p.done;return p.day===CF;}
 var DL={seg:'Segunda',qua:'Quarta',sex:'Sexta'};
 
 function render(){
@@ -186,61 +181,67 @@ function render(){
     var w=DATA[i];
     var vis=w.posts.filter(mf);
     if(!vis.length)continue;
-    var wd=w.posts.filter(function(p){return p.done;}).length;
+    var wd=0;for(var k=0;k<w.posts.length;k++){if(w.posts[k].done)wd++;}
     tt+=w.posts.length;td+=wd;
     h+='<div class="week"><div class="wh"><span class="wn">SEMANA '+w.week+'</span><span class="wt">'+w.theme+'</span><span class="wd">'+w.dates+'</span><span class="wp">'+wd+'/'+w.posts.length+'</span></div><div class="posts">';
     for(var j=0;j<vis.length;j++){
       var p=vis[j];
-      h+='<div class="post day-'+p.day+(p.done?' done':'')+(p.obs?' has-obs':'')+'"><div class="pd"><span class="dt">'+DL[p.day]+'</span><span class="pdate">'+p.post_date+'</span></div><div class="ch">'+p.channel+'</div>'+(p.done?'<div class="db">CONCLUIDO</div>':'')+'<div class="pt">'+p.title+'</div>'+(p.hook?'<div class="ph">"'+p.hook+'"</div>':'')+'<div class="pdesc">'+p.description+'</div>'+(p.obs?'<div class="obs">'+p.obs+'</div>':'')+'<div class="pa"><button class="btn bdone" onclick="window.tog(''+p.id+'')">'+( p.done?'Desfazer':'Feito')+'</button><button class="btn bedit" onclick="window.oE(''+p.id+'')">Editar</button><button class="btn bobs" onclick="window.oO(''+p.id+'')">Obs.</button></div></div>';
+      h+='<div class="post day-'+p.day+(p.done?' done':'')+(p.obs?' has-obs':'')+'">'+
+        '<div class="pd"><span class="dt">'+DL[p.day]+'</span><span class="pdate">'+p.d+'</span></div>'+
+        '<div class="ch">'+p.ch+'</div>'+
+        (p.done?'<div class="db">CONCLUIDO</div>':'')+
+        '<div class="pt">'+p.t+ '</div>'+
+         (p.h?'<div class="ph">"'+p.h+'"</div>':'')+
+         '<div class="pdesc">'+p.dc+'</div>'+
+         (p.obs?'<div class="obs">'+p.obs+'</div>':'')+
+         '<div class="pa">'+
+         '<button class="btn bdone" onclick="tog(\''+p.id+'\')">'+( p.done?'Desfazer':'Feito')+'</button>'+
+         '<button class="btn bedit" onclick="oE(\''+p.id+'\')">Editar</button>'+
+         '<button class="btn bobs" onclick="oO(\''+p.id+'\')">Obs.</button>'+
+         '</div></div>';
     }
     h+='</div></div>';
   }
-  if(!h)h='<div style="text-align:center;padding:60px;color:var(--sand-dim);font-family:JetBrains Mono,monospace;font-size:11px;">NENHUMA PUBLICACAO</div>';
+  if(!h)h='<div style="text-align:center;padding:60px;color:var(--sand-dim);font-family:monospace;font-size:11px;">NENHUMA PUBLICACAO</div>';
   c.innerHTML=h;
   document.getElementById('sd').textContent=td;
   document.getElementById('st').textContent=tt;
   document.getElementById('sp').textContent=tt>0?Math.round(td/tt*100)+'%':'0%';
 }
 
-window.tog=function(id){var p=gp(id);if(!p)return;p.done=!p.done;saveLS();render();syncOne(id,{done:p.done});};
-window.oE=function(id){var p=gp(id);if(!p)return;EID=id;document.getElementById('et').value=p.title;document.getElementById('eh').value=p.hook||'';document.getElementById('ed').value=p.description;document.getElementById('ec').value=p.channel;document.getElementById('me').classList.add('open');};
-window.saveE=function(){var p=gp(EID);if(!p)return;p.title=document.getElementById('et').value;p.hook=document.getElementById('eh').value;p.description=document.getElementById('ed').value;p.channel=document.getElementById('ec').value;saveLS();closeM('me');render();syncOne(EID,{title:p.title,hook:p.hook,description:p.description,channel:p.channel});};
-window.oO=function(id){var p=gp(id);if(!p)return;OID=id;document.getElementById('ot').value=p.obs||'';document.getElementById('mo').classList.add('open');};
-window.saveO=function(){var p=gp(OID);if(!p)return;p.obs=document.getElementById('ot').value.trim();saveLS();closeM('mo');render();syncOne(OID,{obs:p.obs});};
-window.closeM=function(id){document.getElementById(id).classList.remove('open');};
-window.setF=function(f,b){CF=f;document.querySelectorAll('.fbtn').forEach(function(x){x.classList.remove('active');});b.classList.add('active');render();};
+function tog(id){var p=gp(id);if(!p)return;p.done=!p.done;saveLS();render();sync(id,{done:p.done});}
+function oE(id){var p=gp(id);if(!p)return;EID=id;document.getElementById('et').value=p.t;document.getElementById('eh').value=p.h||'';document.getElementById('ed').value=p.dc;document.getElementById('ec').value=p.ch;document.getElementById('me').classList.add('open');}
+function saveE(){var p=gp(EID);if(!p)return;p.t=document.getElementById('et').value;p.h=document.getElementById('eh').value;p.dc=document.getElementById('ed').value;p.ch=document.getElementById('ec').value;saveLS();closeM('me');render();sync(EID,{title:p.t,hook:p.h,description:p.dc,channel:p.ch});}
+function oO(id){var p=gp(id);if(!p)return;OID=id;document.getElementById('ot').value=p.obs||'';document.getElementById('mo').classList.add('open');}
+function saveO(){var p=gp(OID);if(!p)return;p.obs=document.getElementById('ot').value.trim();saveLS();closeM('mo');render();sync(OID,{obs:p.obs});}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+function setF(f,b){CF=f;var btns=document.querySelectorAll('.fbtn');for(var i=0;i<btns.length;i++)btns[i].classList.remove('active');b.classList.add('active');render();}
 
-function syncOne(id,fields){
+function sync(id,fields){
   fields.updated_at=new Date().toISOString();
   fetch(SU+'/rest/v1/'+TB+'?id=eq.'+id,{method:'PATCH',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(fields)}).catch(function(){});
 }
 
-function syncFromServer(){
+function syncAll(){
   fetch(SU+'/rest/v1/'+TB+'?select=id,done,obs&order=week.asc',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}})
     .then(function(r){return r.json();})
     .then(function(rows){
       if(!rows||!rows.length)return;
-      var changed=false;
-      rows.forEach(function(row){
-        var p=gp(row.id);
-        if(p&&(p.done!==row.done||p.obs!==row.obs)){
-          p.done=row.done;p.obs=row.obs||'';changed=true;
-        }
-      });
-      if(changed){saveLS();render();}
+      var ch=false;
+      for(var i=0;i<rows.length;i++){var p=gp(rows[i].id);if(p&&(p.done!==rows[i].done||p.obs!==rows[i].obs)){p.done=rows[i].done;p.obs=rows[i].obs||'';ch=true;}}
+      if(ch){saveLS();render();}
       setOn(true);
-    })
-    .catch(function(){setOn(false);});
+    }).catch(function(){setOn(false);});
 }
 
-document.querySelectorAll('.mo').forEach(function(el){el.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});});
+var mos=document.querySelectorAll('.mo');
+for(var mi=0;mi<mos.length;mi++){
+  mos[mi].addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+}
 
-// INICIALIZAR: render imediato, sync em background
-initData();
+initD();
 render();
-setOn(false);
-setTimeout(syncFromServer,500);
-});
+setTimeout(syncAll,800);
 </script>
 </body>
 </html>
