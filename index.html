@@ -113,7 +113,7 @@ main{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
   </div>
 </div>
 <script>
-(function(){
+document.addEventListener('DOMContentLoaded',function(){
 var SU='https://vtlpqlyownnbxhmugzpj.supabase.co';
 var SK='sb_publishable_gmRaRY8p2XsjW-34RnopCA_6OhZcMFO';
 var TB='calendar_posts';
@@ -240,7 +240,7 @@ initData();
 render();
 setOn(false);
 setTimeout(syncFromServer,500);
-})();
+});
 </script>
 </body>
 </html>
